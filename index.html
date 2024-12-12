@@ -172,12 +172,12 @@
             return formData;
         }
 
-   function submitForm() {
+function submitForm() {
     const formData = collectFormData();
     console.log("Submitting data:", formData); // Log the form data to check its structure
 
     // Send data to Google Apps Script via HTTP POST
-    fetch('https://script.google.com/macros/s/AKfycbwzbSD5xGUixgWqK18524H2fkEuL5h3QKIDyiOKSeN6plflgvcHBR1dBBSTlxHT7kgN9g/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbzWEjop_Tobl3DO7mKTTNRQl6-_DuWT2G0hI5XnhmFuiWB3CoaZdEtz7qZ-0XBxptAKRA/exec', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -190,6 +190,7 @@
             alert('Registration Submitted Successfully!');
             resetForm();
         } else {
+            console.error('Error in response data:', data); // Log the error message from Apps Script
             alert('Error: ' + data.message); // Show the error message from Apps Script
         }
     })
