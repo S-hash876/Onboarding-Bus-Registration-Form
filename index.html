@@ -177,7 +177,7 @@ function submitForm() {
     console.log("Submitting data:", formData); // Log the form data to check its structure
 
     // Send data to Google Apps Script via HTTP POST
-    fetch('https://script.google.com/macros/s/AKfycbwutytjncM9stAohfAyUv_ifCNj6RbRApYzqk-f62oPrgbxbyT16Eejznpb6OZvQKqZsg/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -188,16 +188,14 @@ function submitForm() {
     .then(data => {
         if (data.result === 'success') {
             alert('Registration Submitted Successfully!');
-            resetForm();
-        } else {
-            console.error('Error in response data:', data); // Log the error message from Apps Script
-            alert('Error: ' + data.message); // Show the error message from Apps Script
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting form:', error);
-        alert('Error submitting form. Please try again.');
-    });
+             resetForm();
+            else {
+        alert("Error submitting form. Details: " + (data.error || "Unknown error"));
+    }
+})
+.catch(err => {
+    alert("Error submitting form. Please try again. Details: " + err.message);
+});
 }
 
 
