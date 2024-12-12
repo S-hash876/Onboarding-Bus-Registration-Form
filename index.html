@@ -38,10 +38,10 @@
         <input type="text" id="ownerName" required>
         
         <label for="primaryPhone">Primary Phone Number</label>
-        <input type="tel" id="primaryPhone" required>
+        <input type="tel" id="primaryPhone" pattern="\d*" required>
         
         <label for="additionalPhone">Additional Contact Number</label>
-        <input type="tel" id="additionalPhone">
+        <input type="tel" id="additionalPhone" pattern="\d*">
         
         <label for="address">Complete Address</label>
         <textarea id="address" rows="4" required></textarea>
@@ -50,7 +50,7 @@
     <div class="section">
         <h2>Number of Buses</h2>
         <label for="numberOfBuses">Number Of Buses</label>
-        <select id="numberOfBuses" onchange="generateBusDetails()">
+        <select id="numberOfBuses" onchange="generateBusDetails()" required>
             <option value="">Select Number of Buses</option>
             <!-- Dynamically populate dropdown options -->
             <script>
@@ -99,7 +99,7 @@
                     <input type="number" id="numberOfTrips${i}" required>
                     
                     <label for="numberOfStops${i}">Number Of Stops</label>
-                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})">
+                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})" required>
                         <option value="">Select Number of Stops</option>
                         ${Array.from({length: 25}, (_, j) => `<option value="${j+1}">${j+1}</option>`).join('')}
                     </select>
@@ -134,9 +134,91 @@
             }
         }
 
-        // Other functions (submitForm, collectFormData, loadSheetData) remain the same.
-        // ...
+        function collectFormData() {
+            const formData = {
+                owner: {
+                    name: document.getElementById('ownerName').value,
+                    primaryPhone: document.getElementById('primaryPhone').value,
+                    additionalPhone: document.getElementById('additionalPhone').value,
+                    address: document.getElementById('address').value,
+                },
+                buses: []
+            };
+
+            const numberOfBuses = document.getElementById('numberOfBuses').value;
+
+            for (let i = 1; i <= numberOfBuses; i++) {
+                const bus = {
+                    busName: document.getElementById(`busName${i}`).value,
+                    permitNumber: document.getElementById(`permitNumber${i}`).value,
+                    registrationNumber: document.getElementById(`registrationNumber${i}`).value,
+                    route: document.getElementById(`route${i}`).value,
+                    numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
+                    stops: []
+                };
+
+                const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
+
+                for (let j = 1; j <= numberOfStops; j++) {
+                    bus.stops.push({
+                        stopName: document.getElementById(`stopName${i}_${j}`).value,
+                        fare: document.getElementById(`stopFare${i}_${j}`).value
+                    });
+                }
+
+                formData.buses.push(bus);
+            }
+
+            return formData;
+        }
+
+        function submitForm() {
+            const formData = collectFormData();
+
+            // Here you would send formData to your server or process it further.
+            console.log('Form Data Submitted:', formData);
+
+            alert('Registration Submitted Successfully!');
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('ownerSection').reset();
+            document.getElementById('busDetailsContainer').innerHTML = '';
+            document.getElementById('numberOfBuses').value = '';
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        function loadSheetData() {
+            fetch(SHEET_URL)
+                .then(response => response.text())
+                .then(data => {
+                    const parsedData = Papa.parse(data, {header: true, skipEmptyLines: true});
+                    renderTable(parsedData.data);
+                })
+                .catch(error => console.error('Error loading data:', error));
+        }
+
+        function renderTable(data) {
+            new Tabulator("#dataTable", {
+                data: data,
+                layout: "fitColumns",
+                columns: [
+                    {title: "Owner Name", field: "ownerName"},
+                    {title: "Phone Number", field: "phoneNumber"},
+                    {title: "Address", field: "address"},
+                    {title: "Bus Name", field: "busName"},
+                    {title: "Permit Number", field: "permitNumber"},
+                    {title: "Registration Number", field: "registrationNumber"},
+                    {title: "Route", field: "route"},
+                    {title: "Number of Trips", field: "numberOfTrips"},
+                    {title: "Stops", field: "stops"}
+                ]
+            });
+        }
+
+        // Load sheet data on page load
+        window.onload = loadSheetData;
     </script>
 </body>
 </html>
-
