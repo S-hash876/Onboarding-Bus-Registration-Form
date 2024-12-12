@@ -2,241 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bus Owner Registration Form</title>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Owner Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 20px;
         }
-        label, input, select, textarea {
-            display: block;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-        #dataTable {
-            margin-top: 20px;
-        }
-        .section {
+        .form-section {
             margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <h1>Bus Owner Registration Form</h1>
-    
-    <div class="section" id="ownerSection">
-        <h2>Owner Details</h2>
-        <label for="ownerName">Bus Owner Name</label>
-        <input type="text" id="ownerName" required>
-        
-        <label for="primaryPhone">Primary Phone Number</label>
-        <input type="tel" id="primaryPhone" pattern="\d*" required>
-        
-        <label for="additionalPhone">Additional Contact Number</label>
-        <input type="tel" id="additionalPhone" pattern="\d*">
-        
-        <label for="address">Complete Address</label>
-        <textarea id="address" rows="4" required></textarea>
+
+    <div id="ownerSection" class="form-section">
+        <label for="ownerName">Owner Name*</label>
+        <input type="text" id="ownerName" placeholder="Enter owner name">
+        <div class="error" id="ownerNameError"></div>
+
+        <label for="primaryPhone">Primary Phone Number*</label>
+        <input type="text" id="primaryPhone" placeholder="Enter primary phone number">
+        <div class="error" id="primaryPhoneError"></div>
+
+        <label for="additionalPhone">Additional Phone Number</label>
+        <input type="text" id="additionalPhone" placeholder="Enter additional phone number (optional)">
+
+        <label for="address">Address*</label>
+        <textarea id="address" placeholder="Enter address"></textarea>
+        <div class="error" id="addressError"></div>
+
+        <label for="numberOfBuses">Number of Buses*</label>
+        <input type="number" id="numberOfBuses" placeholder="Enter number of buses" min="1">
+        <div class="error" id="numberOfBusesError"></div>
+
+        <button onclick="addBusDetails()">Add Bus Details</button>
     </div>
 
-    <div class="section">
-        <h2>Number of Buses</h2>
-        <label for="numberOfBuses">Number Of Buses</label>
-        <select id="numberOfBuses" onchange="generateBusDetails()" required>
-            <option value="">Select Number of Buses</option>
-            <!-- Dynamically populate dropdown options -->
-            <script>
-                for (let i = 1; i <= 10; i++) {
-                    document.write(`<option value="${i}">${i}</option>`);
-                }
-            </script>
-        </select>
-    </div>
+    <div id="busDetailsContainer" class="form-section"></div>
 
-    <div id="busDetailsContainer"></div>
     <button id="submitBtn" onclick="submitForm()" style="display:none;">Submit Registration</button>
 
-    <div class="section">
-        <h2>Registered Buses</h2>
-        <div id="dataTable"></div>
-    </div>
-
     <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRpu-qGIABFfgYJeX1RFoffCfAYBvK-mroUqvBV6-JeQi4LJtJEY2-iUl50TD2YfYijQOYtpSZ5UviI/pub?output=csv';
+        function validateField(id, errorId, message) {
+            const field = document.getElementById(id);
+            const errorField = document.getElementById(errorId);
+            if (!field.value.trim()) {
+                errorField.textContent = message;
+                return false;
+            } else {
+                errorField.textContent = '';
+                return true;
+            }
+        }
 
-        function generateBusDetails() {
+        function validateForm() {
+            const isOwnerNameValid = validateField('ownerName', 'ownerNameError', 'Owner name is required.');
+            const isPrimaryPhoneValid = validateField('primaryPhone', 'primaryPhoneError', 'Primary phone number is required.');
+            const isAddressValid = validateField('address', 'addressError', 'Address is required.');
+            const isNumberOfBusesValid = validateField('numberOfBuses', 'numberOfBusesError', 'Number of buses is required.');
+
+            return isOwnerNameValid && isPrimaryPhoneValid && isAddressValid && isNumberOfBusesValid;
+        }
+
+        function addBusDetails() {
             const numberOfBuses = document.getElementById('numberOfBuses').value;
-            const busDetailsContainer = document.getElementById('busDetailsContainer');
-            busDetailsContainer.innerHTML = '';
-            document.getElementById('submitBtn').style.display = 'none';
+
+            if (!validateField('numberOfBuses', 'numberOfBusesError', 'Please enter a valid number of buses.')) {
+                return;
+            }
+
+            const container = document.getElementById('busDetailsContainer');
+            container.innerHTML = '';
 
             for (let i = 1; i <= numberOfBuses; i++) {
-                const busSection = document.createElement('div');
-                busSection.classList.add('section');
-                busSection.innerHTML = `
-                    <h2>Bus ${i} Details</h2>
-                    <label for="busName${i}">Bus Name</label>
-                    <input type="text" id="busName${i}" required>
-                    
-                    <label for="permitNumber${i}">Permit Number</label>
-                    <input type="text" id="permitNumber${i}" required>
-                    
-                    <label for="registrationNumber${i}">Registration Number</label>
-                    <input type="text" id="registrationNumber${i}" required>
-                    
-                    <label for="route${i}">Route</label>
-                    <textarea id="route${i}" rows="2" required></textarea>
-                    
-                    <label for="numberOfTrips${i}">Number Of Trips</label>
-                    <input type="number" id="numberOfTrips${i}" required>
-                    
-                    <label for="numberOfStops${i}">Number Of Stops</label>
-                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})" required>
-                        <option value="">Select Number of Stops</option>
-                        ${Array.from({length: 25}, (_, j) => `<option value="${j+1}">${j+1}</option>`).join('')}
-                    </select>
-                    
-                    <div id="stopDetailsContainer${i}"></div>
+                container.innerHTML += `
+                    <div class="form-section">
+                        <h3>Bus ${i}</h3>
+                        <label for="busName${i}">Bus Name*</label>
+                        <input type="text" id="busName${i}" placeholder="Enter bus name">
+
+                        <label for="busNumber${i}">Bus Number*</label>
+                        <input type="text" id="busNumber${i}" placeholder="Enter bus number">
+
+                        <label for="numberOfSeats${i}">Number of Seats*</label>
+                        <input type="number" id="numberOfSeats${i}" placeholder="Enter number of seats" min="1">
+                    </div>
                 `;
-                busDetailsContainer.appendChild(busSection);
             }
 
-            if (numberOfBuses > 0) {
-                document.getElementById('submitBtn').style.display = 'block';
-            }
+            document.getElementById('submitBtn').style.display = 'block';
         }
 
-        function generateStopDetails(busIndex) {
-            const numberOfStops = document.getElementById(`numberOfStops${busIndex}`).value;
-            const stopDetailsContainer = document.getElementById(`stopDetailsContainer${busIndex}`);
-            stopDetailsContainer.innerHTML = '';
-
-            for (let i = 1; i <= numberOfStops; i++) {
-                const stopSection = document.createElement('div');
-                stopSection.classList.add('section');
-                stopSection.innerHTML = `
-                    <h3>Stop ${i} Details for Bus ${busIndex}</h3>
-                    <label for="stopName${busIndex}_${i}">Stop Name</label>
-                    <input type="text" id="stopName${busIndex}_${i}" required>
-                    
-                    <label for="stopFare${busIndex}_${i}">Fare</label>
-                    <input type="number" id="stopFare${busIndex}_${i}" required>
-                `;
-                stopDetailsContainer.appendChild(stopSection);
-            }
+        function resetForm() {
+            document.getElementById('ownerName').value = '';
+            document.getElementById('primaryPhone').value = '';
+            document.getElementById('additionalPhone').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('numberOfBuses').value = '';
+            document.getElementById('busDetailsContainer').innerHTML = '';
+            document.getElementById('submitBtn').style.display = 'none';
+            const errorFields = document.querySelectorAll('.error');
+            errorFields.forEach(field => field.textContent = '');
         }
 
-        function collectFormData() {
+        function submitForm() {
+            if (!validateForm()) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
             const formData = {
-                owner: {
-                    name: document.getElementById('ownerName').value,
-                    primaryPhone: document.getElementById('primaryPhone').value,
-                    additionalPhone: document.getElementById('additionalPhone').value,
-                    address: document.getElementById('address').value,
-                },
+                ownerName: document.getElementById('ownerName').value,
+                primaryPhone: document.getElementById('primaryPhone').value,
+                additionalPhone: document.getElementById('additionalPhone').value,
+                address: document.getElementById('address').value,
                 buses: []
             };
 
             const numberOfBuses = document.getElementById('numberOfBuses').value;
-
             for (let i = 1; i <= numberOfBuses; i++) {
                 const bus = {
                     busName: document.getElementById(`busName${i}`).value,
-                    permitNumber: document.getElementById(`permitNumber${i}`).value,
-                    registrationNumber: document.getElementById(`registrationNumber${i}`).value,
-                    route: document.getElementById(`route${i}`).value,
-                    numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
-                    stops: []
+                    busNumber: document.getElementById(`busNumber${i}`).value,
+                    numberOfSeats: document.getElementById(`numberOfSeats${i}`).value
                 };
-
-                const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
-
-                for (let j = 1; j <= numberOfStops; j++) {
-                    bus.stops.push({
-                        stopName: document.getElementById(`stopName${i}_${j}`).value,
-                        fare: document.getElementById(`stopFare${i}_${j}`).value
-                    });
-                }
-
                 formData.buses.push(bus);
             }
 
-            return formData;
-        }
-
-function submitForm() {
-    const formData = collectFormData();
-    console.log("Submitting data:", formData); // Log the form data to check its structure
-
-    // Send data to Google Apps Script via HTTP POST
-    fetch('https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.result === 'success') {
-            alert('Registration Submitted Successfully!');
-             resetForm();
-            else {
-        alert("Error submitting form. Details: " + (data.error || "Unknown error"));
-    }
-})
-.catch(err => {
-    alert("Error submitting form. Please try again. Details: " + err.message);
-});
-}
-
-
-
-        function resetForm() {
-            document.getElementById('ownerSection').reset();
-            document.getElementById('busDetailsContainer').innerHTML = '';
-            document.getElementById('numberOfBuses').value = '';
-            document.getElementById('submitBtn').style.display = 'none';
-        }
-
-        function loadSheetData() {
-            fetch(SHEET_URL)
-                .then(response => response.text())
-                .then(data => {
-                    const parsedData = Papa.parse(data, {header: true, skipEmptyLines: true});
-                    renderTable(parsedData.data);
-                })
-                .catch(error => console.error('Error loading data:', error));
-        }
-
-        function renderTable(data) {
-            new Tabulator("#dataTable", {
-                data: data,
-                layout: "fitColumns",
-                columns: [
-                    {title: "Owner Name", field: "ownerName"},
-                    {title: "Phone Number", field: "phoneNumber"},
-                    {title: "Address", field: "address"},
-                    {title: "Bus Name", field: "busName"},
-                    {title: "Permit Number", field: "permitNumber"},
-                    {title: "Registration Number", field: "registrationNumber"},
-                    {title: "Route", field: "route"},
-                    {title: "Number of Trips", field: "numberOfTrips"},
-                    {title: "Stops", field: "stops"}
-                ]
+            fetch('https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    alert('Registration Submitted Successfully!');
+                    resetForm();
+                } else {
+                    alert('Error submitting form. Details: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                alert('Error submitting form. Please try again. Details: ' + err.message);
             });
         }
-
-        // Load sheet data on page load
-        window.onload = loadSheetData;
     </script>
 </body>
 </html>
