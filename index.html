@@ -52,16 +52,7 @@
         <label for="numberOfBuses">Number Of Buses</label>
         <select id="numberOfBuses" onchange="generateBusDetails()">
             <option value="">Select Number of Buses</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
+            ${Array.from({length: 10}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
         </select>
     </div>
 
@@ -74,7 +65,7 @@
     </div>
 
     <script>
-        const SHEET_URL = 'YOUR_GOOGLE_SHEETS_PUBLISHED_CSV_LINK';
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRpu-qGIABFfgYJeX1RFoffCfAYBvK-mroUqvBV6-JeQi4LJtJEY2-iUl50TD2YfYijQOYtpSZ5UviI/pub?output=csv';
 
         function generateBusDetails() {
             const numberOfBuses = document.getElementById('numberOfBuses').value;
@@ -226,4 +217,3 @@
     </script>
 </body>
 </html>
-[_{{{CITATION{{{_1{](https://github.com/BrightonDube/loadhitch/tree/5f07af90dfa2c35d7b1508d402ac2960d34ef622/loadhitch-frontend-modules%2Fpages%2Fstep2.js)[_{{{CITATION{{{_2{](https://github.com/valentinlageard/ft_services/tree/ebd07354afaf9bd75be7cc7d12c984edc5879128/srcs%2Fwordpress%2Fwordpress%2Fwp-admin%2Fincludes%2Fmedia.php)[_{{{CITATION{{{_3{](https://github.com/chelc99/ics211-lab3/tree/1c67fa999dd9107de8a9fa0ce013185db5edc95f/ics211-lab-3-xss-app%2Fsrc%2Ftemplates_c%2F%25%25E0%5EE03%5EE032C1C0%25%25addmessageform.tpl.php)
