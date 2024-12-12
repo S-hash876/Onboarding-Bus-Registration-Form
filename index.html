@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Owner Registration Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #dataTable {
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bus Owner Registration Form</h1>
+    
+    <!-- Form remains the same as previous example -->
+    <div class="section" id="ownerSection">
+        <h2>Owner Details</h2>
+        <label>Bus Owner Name</label>
+        <input type="text" id="ownerName" required>
+        
+        <label>Primary Phone Number</label>
+        <input type="tel" id="primaryPhone" required>
+        
+        <label>Additional Contact Number</label>
+        <input type="tel" id="additionalPhone">
+        
+        <label>Complete Address</label>
+        <textarea id="address" rows="4" required></textarea>
+    </div>
+
+    <!-- Previous form fields remain the same -->
+    <div class="section">
+        <h2>Number of Buses</h2>
+        <label>How many buses do you want to register?</label>
+        <select id="numberOfBuses" onchange="generateBusDetails()">
+            <!-- Bus number options -->
+        </select>
+    </div>
+
+    <div id="busDetailsContainer"></div>
+    <button id="submitBtn" onclick="submitForm()" style="display:none;">Submit Registration</button>
+
+    <!-- New Section for Data Display -->
+    <div class="section">
+        <h2>Registered Buses</h2>
+        <div id="dataTable"></div>
+    </div>
+
+    <script>
+        // Configuration for Google Sheets
+        const SHEET_URL = 'YOUR_GOOGLE_SHEETS_PUBLISHED_CSV_LINK';
+
+        // Modify submitForm to work with Google Sheets
+        function submitForm() {
+            // Previous validation logic
+            const formData = collectFormData();
+            
+            // Flatten data for CSV
+            const flattenedData = formData.buses.map(bus => ({
+                ownerName: formData.ownerDetails.name,
+                primaryPhone: formData.ownerDetails.primaryPhone,
+                additionalPhone: formData.ownerDetails.additionalPhone,
+                address: formData.ownerDetails.address,
+                busName: bus.busName,
+                permitNumber: bus.permitNumber,
+                registrationNumber: bus.registrationNumber,
+                route: bus.route,
+                numberOfTrips: bus.numberOfTrips,
+                stops: bus.stops.map(stop => `${stop.stopName}:${stop.stopFare}`).join(';')
+            }));
+
+            // Convert to CSV
+            const csv = Papa.unparse(flattenedData);
+            
+            // Here you would typically send to Google Sheets
+            console.log('CSV Data:', csv);
+            alert('Form submitted! Data logged to console.');
+
+            // Refresh data table
+            loadSheetData();
+        }
+
+        function collectFormData() {
+            // Previous data collection logic
+            const formData = {
+                ownerDetails: {
+                    name: document.getElementById('ownerName').value,
+                    primaryPhone: document.getElementById('primaryPhone').value,
+                    additionalPhone: document.getElementById('additionalPhone').value,
+                    address: document.getElementById('address').value
+                },
+                buses: []
+            };
+
+            const numberOfBuses = document.getElementById('numberOfBuses').value;
+
+            for (let i = 1; i <= numberOfBuses; i++) {
+                const busDetails = {
+                    busName: document.getElementById(`busName${i}`).value,
+                    permitNumber: document.getElementById(`permitNumber${i}`).value,
+                    registrationNumber: document.getElementById(`registrationNumber${i}`).value,
+                    route: document.getElementById(`route${i}`).value,
+                    numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
+                    stops: []
+                };
+
+                const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
+                
+                for (let j = 1; j <= numberOfStops; j++) {
+                    busDetails.stops.push({
+                        stopName: document.getElementById(`stopName${i}_${j}`).value,
+                        stopFare: document.getElementById(`stopFare${i}_${j}`).value
+                    });
+                }
+
+                formData.buses.push(busDetails);
+            }
+
+            return formData;
+        }
+
+        function loadSheetData() {
+            // Function to load and display sheet data
+            Papa.parse(SHEET_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    // Initialize Tabulator table
+                    var table = new Tabulator("#dataTable", {
+                        data: results.data,
+                        layout: "fitColumns",
+                        columns: [
+                            {title: "Owner Name", field: "ownerName"},
+                            {title: "Phone", field: "primaryPhone"},
+                            {title: "Bus Name", field: "busName"},
+                            {title: "Permit Number", field: "permitNumber"},
+                            {title: "Route", field: "route"},
+                            {title: "Trips", field: "numberOfTrips"},
+                            {title: "Stops", field: "stops"}
+                        ]
+                    });
+                }
+            });
+        }
+
+        // Load data on page load
+        window.onload = loadSheetData;
+
+        // Rest of the previous form generation code remains the same
+    </script>
+</body>
+</html>
