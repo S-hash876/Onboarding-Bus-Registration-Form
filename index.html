@@ -172,15 +172,34 @@
             return formData;
         }
 
-        function submitForm() {
-            const formData = collectFormData();
+       function submitForm() {
+    const formData = collectFormData();
 
-            // Here you would send formData to your server or process it further.
-            console.log('Form Data Submitted:', formData);
-
+    // Send data to Google Apps Script via HTTP POST
+    fetch('https://script.google.com/macros/s/AKfycbwxlx78RBi3wmf5u1yw2_kROrXpQkiT439I1xyOOAfbM3BjjNpxy3Ltz3Rgv3B4tAvr9Q/exec', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.result === 'success') {
+            // If the response is successful, show the success message
             alert('Registration Submitted Successfully!');
             resetForm();
+        } else {
+            // Handle error case
+            alert('Error in submitting the form. Please try again.');
         }
+    })
+    .catch(error => {
+        console.error('Error submitting form:', error);
+        alert('Error submitting form. Please try again.');
+    });
+}
+
 
         function resetForm() {
             document.getElementById('ownerSection').reset();
