@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bus Owner Registration Form</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
@@ -52,7 +53,8 @@
         <label for="numberOfBuses">Number Of Buses</label>
         <select id="numberOfBuses" onchange="generateBusDetails()" required>
             <option value="">Select Number of Buses</option>
-            <!-- Dynamically populate dropdown options -->
+            <!-- Populate dropdown options dynamically -->
+            ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
         </select>
     </div>
 
@@ -73,11 +75,11 @@
             busDetailsContainer.innerHTML = '';
             document.getElementById('submitBtn').style.display = 'none';
 
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= numberOfBuses; i++) {
                 const busSection = document.createElement('div');
                 busSection.classList.add('section');
-                busSection.innerHTML = 
-                    <h2>Bus ${i} Details</h2>;
+                busSection.innerHTML = `
+                    <h2>Bus ${i} Details</h2>
                     <label for="busName${i}">Bus Name</label>
                     <input type="text" id="busName${i}" required>
                     
@@ -96,11 +98,11 @@
                     <label for="numberOfStops${i}">Number Of Stops</label>
                     <select id="numberOfStops${i}" onchange="generateStopDetails(${i})" required>
                         <option value="">Select Number of Stops</option>
-                        ${Array.from({length: 25}, (_, j) => '<option value="${j+1}">${j+1}</option>').join('')}
+                        ${Array.from({ length: 25 }, (_, j) => `<option value="${j + 1}">${j + 1}</option>`).join('')}
                     </select>
                     
                     <div id="stopDetailsContainer${i}"></div>
-                ;
+                `;
                 busDetailsContainer.appendChild(busSection);
             }
 
@@ -110,21 +112,21 @@
         }
 
         function generateStopDetails(busIndex) {
-            const numberOfStops = document.getElementById(numberOfStops${busIndex}).value;
-            const stopDetailsContainer = document.getElementById(stopDetailsContainer${busIndex});
+            const numberOfStops = document.getElementById(`numberOfStops${busIndex}`).value;
+            const stopDetailsContainer = document.getElementById(`stopDetailsContainer${busIndex}`);
             stopDetailsContainer.innerHTML = '';
 
-            for (let i = 1; i <= 25; i++) {
+            for (let i = 1; i <= numberOfStops; i++) {
                 const stopSection = document.createElement('div');
                 stopSection.classList.add('section');
-                stopSection.innerHTML = 
+                stopSection.innerHTML = `
                     <h3>Stop ${i} Details for Bus ${busIndex}</h3>
                     <label for="stopName${busIndex}_${i}">Stop Name</label>
                     <input type="text" id="stopName${busIndex}_${i}" required>
                     
                     <label for="stopFare${busIndex}_${i}">Fare</label>
                     <input type="number" id="stopFare${busIndex}_${i}" required>
-                ;
+                `;
                 stopDetailsContainer.appendChild(stopSection);
             }
         }
@@ -144,20 +146,20 @@
 
             for (let i = 1; i <= numberOfBuses; i++) {
                 const bus = {
-                    busName: document.getElementById('busName${i}').value,
-                    permitNumber: document.getElementById('permitNumber${i}').value,
-                    registrationNumber: document.getElementById(registrationNumber${i}).value,
-                    route: document.getElementById(route${i}).value,
-                    numberOfTrips: document.getElementById(numberOfTrips${i}).value,
+                    busName: document.getElementById(`busName${i}`).value,
+                    permitNumber: document.getElementById(`permitNumber${i}`).value,
+                    registrationNumber: document.getElementById(`registrationNumber${i}`).value,
+                    route: document.getElementById(`route${i}`).value,
+                    numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
                     stops: []
                 };
 
-                const numberOfStops = document.getElementById(numberOfStops${i}).value;
+                const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
 
                 for (let j = 1; j <= numberOfStops; j++) {
                     bus.stops.push({
-                        stopName: document.getElementById(stopName${i}_${j}).value,
-                        fare: document.getElementById(stopFare${i}_${j}).value
+                        stopName: document.getElementById(`stopName${i}_${j}`).value,
+                        fare: document.getElementById(`stopFare${i}_${j}`).value
                     });
                 }
 
@@ -167,73 +169,38 @@
             return formData;
         }
 
-function submitForm() {
-    const formData = collectFormData();
-    console.log("Submitting data:", formData); // Log the form data to check its structure
-
-    // Send data to Google Apps Script via HTTP POST
-    fetch('https://script.google.com/macros/s/AKfycbzsQ0NINfIPi4Zgr6EWlXR4Hy8Cn9pYROULQsNJp1mkzSajA1G-LvtZMV_rce2t_L_oxw/exec', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.result === 'success') {
-            alert('Registration Submitted Successfully!');
-            resetForm();
-        } else {
-            console.error('Error in response data:', data); // Log the error message from Apps Script
-            alert('Error: ' + data.message); // Show the error message from Apps Script
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting form:', error);
-        alert('Error submitting form. Please try again.');
-    });
-}
-
-
-
-        function resetForm() {
-            document.getElementById('ownerSection').reset();
-            document.getElementById('busDetailsContainer').innerHTML = '';
-            document.getElementById('numberOfBuses').value = '';
-            document.getElementById('submitBtn').style.display = 'none';
+        function submitForm() {
+            const formData = collectFormData();
+            console.log("Submitting data:", formData);
         }
 
-        function loadSheetData() {
+        window.onload = () => {
             fetch(SHEET_URL)
                 .then(response => response.text())
                 .then(data => {
-                    const parsedData = Papa.parse(data, {header: true, skipEmptyLines: true});
+                    const parsedData = Papa.parse(data, { header: true, skipEmptyLines: true });
                     renderTable(parsedData.data);
                 })
                 .catch(error => console.error('Error loading data:', error));
-        }
+        };
 
         function renderTable(data) {
             new Tabulator("#dataTable", {
                 data: data,
                 layout: "fitColumns",
                 columns: [
-                    {title: "Owner Name", field: "ownerName"},
-                    {title: "Phone Number", field: "phoneNumber"},
-                    {title: "Address", field: "address"},
-                    {title: "Bus Name", field: "busName"},
-                    {title: "Permit Number", field: "permitNumber"},
-                    {title: "Registration Number", field: "registrationNumber"},
-                    {title: "Route", field: "route"},
-                    {title: "Number of Trips", field: "numberOfTrips"},
-                    {title: "Stops", field: "stops"}
+                    { title: "Owner Name", field: "ownerName" },
+                    { title: "Phone Number", field: "phoneNumber" },
+                    { title: "Address", field: "address" },
+                    { title: "Bus Name", field: "busName" },
+                    { title: "Permit Number", field: "permitNumber" },
+                    { title: "Registration Number", field: "registrationNumber" },
+                    { title: "Route", field: "route" },
+                    { title: "Number of Trips", field: "numberOfTrips" },
+                    { title: "Stops", field: "stops" }
                 ]
             });
         }
-
-        // Load sheet data on page load
-        window.onload = loadSheetData;
     </script>
 </body>
 </html>
