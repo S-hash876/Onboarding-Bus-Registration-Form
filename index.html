@@ -124,7 +124,7 @@
             container.innerHTML = '';
             submitBtn.style.display = 'none';
 
-            for (let i = 1; i <= numberOfBuses; i++) {
+            for (let i = 0; i <= numberOfBuses; i++) {
                 const busSection = document.createElement('div');
                 busSection.className = 'section bus-section';
                 busSection.innerHTML = `
@@ -168,7 +168,7 @@
             // Clear previous stop details
             container.innerHTML = '';
 
-            for (let i = 1; i <= numberOfStops; i++) {
+            for (let i = 0; i <= numberOfStops; i++) {
                 const stopSection = document.createElement('div');
                 stopSection.className = 'stop-section';
                 stopSection.innerHTML = `
