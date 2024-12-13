@@ -221,7 +221,7 @@
 
             const numberOfBuses = document.getElementById('numberOfBuses').value;
 
-            for (let i = 1; i <= numberOfBuses; i++) {
+            for (let i = 0; i <= numberOfBuses; i++) {
                 const busDetails = {
                     busName: document.getElementById(`busName${i}`).value,
                     permitNumber: document.getElementById(`permitNumber${i}`).value,
@@ -233,7 +233,7 @@
 
                 const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
                 
-                for (let j = 1; j <= numberOfStops; j++) {
+                for (let j = 0; j <= numberOfStops; j++) {
                     busDetails.stops.push({
                         stopName: document.getElementById(`stopName${i}_${j}`).value,
                         fare: document.getElementById(`stopFare${i}_${j}`).value
