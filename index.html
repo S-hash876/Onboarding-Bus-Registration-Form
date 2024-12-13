@@ -240,7 +240,13 @@
                     });
                 }
 
-                formData.buses.push(busDetails);
+                // Create a row for each stop
+                    formData.push({
+                        owner: owner,
+                        bus: busDetails,
+                        stop: busDetails.stops[j-1]
+                    });
+
             }
 
             // Send data to Google Apps Script
