@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bus Owner Registration Form</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
@@ -39,10 +38,10 @@
         <input type="text" id="ownerName" required>
         
         <label for="primaryPhone">Primary Phone Number</label>
-        <input type="tel" id="primaryPhone" pattern="\d*" required>
+        <input type="tel" id="primaryPhone" required>
         
         <label for="additionalPhone">Additional Contact Number</label>
-        <input type="tel" id="additionalPhone" pattern="\d*">
+        <input type="tel" id="additionalPhone">
         
         <label for="address">Complete Address</label>
         <textarea id="address" rows="4" required></textarea>
@@ -51,9 +50,9 @@
     <div class="section">
         <h2>Number of Buses</h2>
         <label for="numberOfBuses">Number Of Buses</label>
-        <select id="numberOfBuses" onchange="generateBusDetails()" required>
+        <select id="numberOfBuses" onchange="generateBusDetails()">
             <option value="">Select Number of Buses</option>
-            ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+            ${Array.from({length: 10}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
         </select>
     </div>
 
@@ -95,9 +94,9 @@
                     <input type="number" id="numberOfTrips${i}" required>
                     
                     <label for="numberOfStops${i}">Number Of Stops</label>
-                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})" required>
+                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})">
                         <option value="">Select Number of Stops</option>
-                        ${Array.from({ length: 25 }, (_, j) => `<option value="${j + 1}">${j + 1}</option>`).join('')}
+                        ${Array.from({length: 25}, (_, j) => `<option value="${j+1}">${j+1}</option>`).join('')}
                     </select>
                     
                     <div id="stopDetailsContainer${i}"></div>
@@ -130,13 +129,37 @@
             }
         }
 
+        function submitForm() {
+            const formData = collectFormData();
+            
+            const flattenedData = formData.buses.map(bus => ({
+                ownerName: formData.ownerDetails.name,
+                primaryPhone: formData.ownerDetails.primaryPhone,
+                additionalPhone: formData.ownerDetails.additionalPhone,
+                address: formData.ownerDetails.address,
+                busName: bus.busName,
+                permitNumber: bus.permitNumber,
+                registrationNumber: bus.registrationNumber,
+                route: bus.route,
+                numberOfTrips: bus.numberOfTrips,
+                stops: bus.stops.map(stop => `${stop.stopName}:${stop.stopFare}`).join(';')
+            }));
+
+            const csv = Papa.unparse(flattenedData);
+            
+            console.log('CSV Data:', csv);
+            alert('Form submitted! Data logged to console.');
+
+            loadSheetData();
+        }
+
         function collectFormData() {
             const formData = {
-                owner: {
+                ownerDetails: {
                     name: document.getElementById('ownerName').value,
                     primaryPhone: document.getElementById('primaryPhone').value,
                     additionalPhone: document.getElementById('additionalPhone').value,
-                    address: document.getElementById('address').value,
+                    address: document.getElementById('address').value
                 },
                 buses: []
             };
@@ -144,7 +167,7 @@
             const numberOfBuses = document.getElementById('numberOfBuses').value;
 
             for (let i = 1; i <= numberOfBuses; i++) {
-                const bus = {
+                const busDetails = {
                     busName: document.getElementById(`busName${i}`).value,
                     permitNumber: document.getElementById(`permitNumber${i}`).value,
                     registrationNumber: document.getElementById(`registrationNumber${i}`).value,
@@ -154,52 +177,43 @@
                 };
 
                 const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
-
+                
                 for (let j = 1; j <= numberOfStops; j++) {
-                    bus.stops.push({
+                    busDetails.stops.push({
                         stopName: document.getElementById(`stopName${i}_${j}`).value,
-                        fare: document.getElementById(`stopFare${i}_${j}`).value
+                        stopFare: document.getElementById(`stopFare${i}_${j}`).value
                     });
                 }
 
-                formData.buses.push(bus);
+                formData.buses.push(busDetails);
             }
 
             return formData;
         }
 
-        function submitForm() {
-            const formData = collectFormData();
-            console.log("Submitting data:", formData);
-        }
-
-        window.onload = () => {
-            fetch(SHEET_URL)
-                .then(response => response.text())
-                .then(data => {
-                    const parsedData = Papa.parse(data, { header: true, skipEmptyLines: true });
-                    renderTable(parsedData.data);
-                })
-                .catch(error => console.error('Error loading data:', error));
-        };
-
-        function renderTable(data) {
-            new Tabulator("#dataTable", {
-                data: data,
-                layout: "fitColumns",
-                columns: [
-                    { title: "Owner Name", field: "ownerName" },
-                    { title: "Phone Number", field: "phoneNumber" },
-                    { title: "Address", field: "address" },
-                    { title: "Bus Name", field: "busName" },
-                    { title: "Permit Number", field: "permitNumber" },
-                    { title: "Registration Number", field: "registrationNumber" },
-                    { title: "Route", field: "route" },
-                    { title: "Number of Trips", field: "numberOfTrips" },
-                    { title: "Stops", field: "stops" }
-                ]
+        function loadSheetData() {
+            Papa.parse(SHEET_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    var table = new Tabulator("#dataTable", {
+                        data: results.data,
+                        layout: "fitColumns",
+                        columns: [
+                            {title: "Owner Name", field: "ownerName"},
+                            {title: "Phone", field: "primaryPhone"},
+                            {title: "Bus Name", field: "busName"},
+                            {title: "Permit Number", field: "permitNumber"},
+                            {title: "Route", field: "route"},
+                            {title: "Trips", field: "numberOfTrips"},
+                            {title: "Stops", field: "stops"}
+                        ]
+                    });
+                }
             });
         }
+
+        window.onload = loadSheetData;
     </script>
 </body>
 </html>
