@@ -241,11 +241,8 @@
                 }
 
                 // Create a row for each stop
-                    formData.push({
-                        owner: owner,
-                        bus: busDetails,
-                        stop: busDetails.stops[j-1]
-                    });
+                 // Add bus details to the formData object
+                formData.buses.push(busDetails);  
 
             }
 
