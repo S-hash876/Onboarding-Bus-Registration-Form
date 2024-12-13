@@ -113,7 +113,7 @@
 
     <script>
         // Google Apps Script Web App URL
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVjNWwry9lg1muhHx7TKctbub3fcdloXEm1s3mvJQ11iLgbDWBPLJoQHnstK64YglzSg/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec';
 
         function generateBusDetails() {
             const numberOfBuses = document.getElementById('numberOfBuses').value;
@@ -127,7 +127,7 @@
             for (let i = 1; i <= numberOfBuses; i++) {
                 const busSection = document.createElement('div');
                 busSection.className = 'section bus-section';
-                busSection.innerHTML = 
+                busSection.innerHTML = `
                     <h3>Bus ${i} Details</h3>
                     <label>Bus Name</label>
                     <input type="text" id="busName${i}" required>
@@ -148,12 +148,12 @@
                     <select id="numberOfStops${i}" onchange="generateStopDetails(${i})">
                         <option value="">Select Number of Stops</option>
                         ${[...Array(25).keys()].map((n) => 
-                            <option value="${n+1}">${n+1}</option>
+                            `<option value="${n+1}">${n+1}</option>`
                         ).join('')}
                     </select>
                     
                     <div id="stopDetailsContainer${i}"></div>
-                ;
+                `;
                 
                 container.appendChild(busSection);
             }
@@ -162,8 +162,8 @@
         }
 
         function generateStopDetails(busNumber) {
-            const numberOfStops = document.getElementById(numberOfStops${busNumber}).value;
-            const container = document.getElementById(stopDetailsContainer${busNumber});
+            const numberOfStops = document.getElementById(`numberOfStops${busNumber}`).value;
+            const container = document.getElementById(`stopDetailsContainer${busNumber}`);
             
             // Clear previous stop details
             container.innerHTML = '';
@@ -171,14 +171,14 @@
             for (let i = 1; i <= numberOfStops; i++) {
                 const stopSection = document.createElement('div');
                 stopSection.className = 'stop-section';
-                stopSection.innerHTML = 
+                stopSection.innerHTML = `
                     <h4>Stop ${i} Details for Bus ${busNumber}</h4>
                     <label>Stop Name</label>
                     <input type="text" id="stopName${busNumber}_${i}" required>
                     
                     <label>Stop Fare</label>
                     <input type="number" id="stopFare${busNumber}_${i}" required>
-                ;
+                `;
                 
                 container.appendChild(stopSection);
             }
@@ -223,20 +223,20 @@
 
             for (let i = 1; i <= numberOfBuses; i++) {
                 const busDetails = {
-                    busName: document.getElementById(busName${i}).value,
-                    permitNumber: document.getElementById(permitNumber${i}).value,
-                    registrationNumber: document.getElementById(registrationNumber${i}).value,
-                    route: document.getElementById(route${i}).value,
-                    numberOfTrips: document.getElementById(numberOfTrips${i}).value,
+                    busName: document.getElementById(`busName${i}`).value,
+                    permitNumber: document.getElementById(`permitNumber${i}`).value,
+                    registrationNumber: document.getElementById(`registrationNumber${i}`).value,
+                    route: document.getElementById(`route${i}`).value,
+                    numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
                     stops: []
                 };
 
-                const numberOfStops = document.getElementById(numberOfStops${i}).value;
+                const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
                 
                 for (let j = 1; j <= numberOfStops; j++) {
                     busDetails.stops.push({
-                        stopName: document.getElementById(stopName${i}_${j}).value,
-                        fare: document.getElementById(stopFare${i}_${j}).value
+                        stopName: document.getElementById(`stopName${i}_${j}`).value,
+                        fare: document.getElementById(`stopFare${i}_${j}`).value
                     });
                 }
 
