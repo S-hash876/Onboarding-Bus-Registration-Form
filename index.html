@@ -77,7 +77,7 @@
                 const busSection = document.createElement('div');
                 busSection.classList.add('section');
                 busSection.innerHTML = 
-                    <h2>Bus ${i} Details</h2>
+                    <h2>Bus ${i} Details</h2>;
                     <label for="busName${i}">Bus Name</label>
                     <input type="text" id="busName${i}" required>
                     
@@ -96,7 +96,7 @@
                     <label for="numberOfStops${i}">Number Of Stops</label>
                     <select id="numberOfStops${i}" onchange="generateStopDetails(${i})" required>
                         <option value="">Select Number of Stops</option>
-                        ${Array.from({length: 25}, (_, j) => <option value="${j+1}">${j+1}</option>).join('')}
+                        ${Array.from({length: 25}, (_, j) => '<option value="${j+1}">${j+1}</option>').join('')}
                     </select>
                     
                     <div id="stopDetailsContainer${i}"></div>
@@ -144,8 +144,8 @@
 
             for (let i = 1; i <= numberOfBuses; i++) {
                 const bus = {
-                    busName: document.getElementById(busName${i}).value,
-                    permitNumber: document.getElementById(permitNumber${i}).value,
+                    busName: document.getElementById('busName${i}').value,
+                    permitNumber: document.getElementById('permitNumber${i}').value,
                     registrationNumber: document.getElementById(registrationNumber${i}).value,
                     route: document.getElementById(route${i}).value,
                     numberOfTrips: document.getElementById(numberOfTrips${i}).value,
