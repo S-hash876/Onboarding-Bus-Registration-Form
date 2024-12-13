@@ -43,9 +43,35 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #loadingContent {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div id="loadingContent">
+            <h2>Submitting Form...</h2>
+            <p>Please wait while we process your registration.</p>
+        </div>
+    </div>
+
     <h1>Bus Owner Registration Form</h1>
     
     <div class="section" id="ownerSection">
@@ -86,6 +112,9 @@
     <button id="submitBtn" onclick="submitForm()" style="display:none;">Submit Registration</button>
 
     <script>
+        // Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec';
+
         function generateBusDetails() {
             const numberOfBuses = document.getElementById('numberOfBuses').value;
             const container = document.getElementById('busDetailsContainer');
@@ -156,6 +185,9 @@
         }
 
         function submitForm() {
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
             // Basic form validation
             const requiredFields = document.querySelectorAll('[required]');
             let isValid = true;
@@ -170,16 +202,18 @@
             });
 
             if (!isValid) {
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
                 alert('Please fill all required fields');
                 return;
             }
 
             // Collect form data
             const formData = {
-                ownerDetails: {
+                owner: {
                     name: document.getElementById('ownerName').value,
                     primaryPhone: document.getElementById('primaryPhone').value,
-                    additionalPhone: document.getElementById('additionalPhone').value,
+                    additionalPhone: document.getElementById('additionalPhone').value || '',
                     address: document.getElementById('address').value
                 },
                 buses: []
@@ -202,16 +236,53 @@
                 for (let j = 1; j <= numberOfStops; j++) {
                     busDetails.stops.push({
                         stopName: document.getElementById(`stopName${i}_${j}`).value,
-                        stopFare: document.getElementById(`stopFare${i}_${j}`).value
+                        fare: document.getElementById(`stopFare${i}_${j}`).value
                     });
                 }
 
                 formData.buses.push(busDetails);
             }
 
-            // Here you would typically send this data to a server
-            console.log(JSON.stringify(formData, null, 2));
-            alert('Form submitted successfully! Check console for data.');
+            // Send data to Google Apps Script
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important for Google Apps Script
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // Show success message
+                alert('Form submitted successfully!');
+                
+                // Reset form
+                resetForm();
+            })
+            .catch(error => {
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+
+        function resetForm() {
+            // Reset owner details
+            document.getElementById('ownerName').value = '';
+            document.getElementById('primaryPhone').value = '';
+            document.getElementById('additionalPhone').value = '';
+            document.getElementById('address').value = '';
+
+            // Reset bus details
+            document.getElementById('numberOfBuses').value = '';
+            document.getElementById('busDetailsContainer').innerHTML = '';
+            document.getElementById('submitBtn').style.display = 'none';
         }
     </script>
 </body>
