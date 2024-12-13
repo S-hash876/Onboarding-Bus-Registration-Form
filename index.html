@@ -53,11 +53,6 @@
         <select id="numberOfBuses" onchange="generateBusDetails()" required>
             <option value="">Select Number of Buses</option>
             <!-- Dynamically populate dropdown options -->
-            <script>
-                for (let i = 1; i <= 10; i++) {
-                    document.write(<option value="${i}">${i}</option>);
-                }
-            </script>
         </select>
     </div>
 
@@ -78,7 +73,7 @@
             busDetailsContainer.innerHTML = '';
             document.getElementById('submitBtn').style.display = 'none';
 
-            for (let i = 1; i <= numberOfBuses; i++) {
+            for (let i = 1; i <= 10; i++) {
                 const busSection = document.createElement('div');
                 busSection.classList.add('section');
                 busSection.innerHTML = 
@@ -119,7 +114,7 @@
             const stopDetailsContainer = document.getElementById(stopDetailsContainer${busIndex});
             stopDetailsContainer.innerHTML = '';
 
-            for (let i = 1; i <= numberOfStops; i++) {
+            for (let i = 1; i <= 25; i++) {
                 const stopSection = document.createElement('div');
                 stopSection.classList.add('section');
                 stopSection.innerHTML = 
