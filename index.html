@@ -22,10 +22,11 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
         .bus-section, .stop-section {
             background-color: #f9f9f9;
@@ -116,73 +117,75 @@
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUm8xBB9EHIx_XjLs0o54_HtJtSfmk_OPqz0lzZHJ-JIkYeRQcDwnEUQ4cEatDrrwjTA/exec';
 
         function generateBusDetails() {
-            const numberOfBuses = document.getElementById('numberOfBuses').value;
-            const container = document.getElementById('busDetailsContainer');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            // Clear previous bus details
-            container.innerHTML = '';
-            submitBtn.style.display = 'none';
+    const numberOfBuses = document.getElementById('numberOfBuses').value;
+    const container = document.getElementById('busDetailsContainer');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Clear previous bus details
+    container.innerHTML = '';
+    submitBtn.style.display = 'none';
 
-            for (let i = 1; i <= numberOfBuses; i++) {
-                const busSection = document.createElement('div');
-                busSection.className = 'section bus-section';
-                busSection.innerHTML = `
-                    <h3>Bus ${i} Details</h3>
-                    <label>Bus Name</label>
-                    <input type="text" id="busName${i}" required>
-                    
-                    <label>Permit Number</label>
-                    <input type="text" id="permitNumber${i}" required>
-                    
-                    <label>Registration Number</label>
-                    <input type="text" id="registrationNumber${i}" required>
-                    
-                    <label>Route</label>
-                    <input type="text" id="route${i}" required>
-                    
-                    <label>Number of Trips</label>
-                    <input type="number" id="numberOfTrips${i}" required>
-                    
-                    <label>Number of Stops</label>
-                    <select id="numberOfStops${i}" onchange="generateStopDetails(${i})">
-                        <option value="">Select Number of Stops</option>
-                        ${[...Array(25).keys()].map((n) => 
-                            `<option value="${n+1}">${n+1}</option>`
-                        ).join('')}
-                    </select>
-                    
-                    <div id="stopDetailsContainer${i}"></div>
-                `;
-                
-                container.appendChild(busSection);
-            }
+    for (let i = 0; i < numberOfBuses; i++) {  // Corrected index
+        const busSection = document.createElement('div');
+        busSection.className = 'section bus-section';
+        busSection.innerHTML = `
+            <h3>Bus ${i + 1} Details</h3>  <!-- Display bus number correctly -->
+            <label>Bus Name</label>
+            <input type="text" id="busName${i}" required>
             
-            submitBtn.style.display = 'block';
-        }
+            <label>Permit Number</label>
+            <input type="text" id="permitNumber${i}" required>
+            
+            <label>Registration Number</label>
+            <input type="text" id="registrationNumber${i}" required>
+            
+            <label>Route</label>
+            <input type="text" id="route${i}" required>
+            
+            <label>Number of Trips</label>
+            <input type="number" id="numberOfTrips${i}" required>
+            
+            <label>Number of Stops</label>
+            <select id="numberOfStops${i}" onchange="generateStopDetails(${i})">
+                <option value="">Select Number of Stops</option>
+                ${[...Array(25).keys()].map((n) => 
+                    `<option value="${n+1}">${n+1}</option>`
+                ).join('')}
+            </select>
+            
+            <div id="stopDetailsContainer${i}"></div>
+        `;
+        
+        container.appendChild(busSection);
+    }
+    
+    submitBtn.style.display = 'block';
+}
+
 
         function generateStopDetails(busNumber) {
-            const numberOfStops = document.getElementById(`numberOfStops${busNumber}`).value;
-            const container = document.getElementById(`stopDetailsContainer${busNumber}`);
-            
-            // Clear previous stop details
-            container.innerHTML = '';
+    const numberOfStops = document.getElementById(`numberOfStops${busNumber}`).value;
+    const container = document.getElementById(`stopDetailsContainer${busNumber}`);
+    
+    // Clear previous stop details
+    container.innerHTML = '';
 
-            for (let i = 1; i <= numberOfStops; i++) {
-                const stopSection = document.createElement('div');
-                stopSection.className = 'stop-section';
-                stopSection.innerHTML = `
-                    <h4>Stop ${i} Details for Bus ${busNumber}</h4>
-                    <label>Stop Name</label>
-                    <input type="text" id="stopName${busNumber}_${i}" required>
-                    
-                    <label>Stop Fare</label>
-                    <input type="number" id="stopFare${busNumber}_${i}" required>
-                `;
-                
-                container.appendChild(stopSection);
-            }
-        }
+    for (let j = 0; j < numberOfStops; j++) {  // Corrected index
+        const stopSection = document.createElement('div');
+        stopSection.className = 'stop-section';
+        stopSection.innerHTML = `
+            <h4>Stop ${j + 1} Details for Bus ${busNumber + 1}</h4>  <!-- Correct stop numbering -->
+            <label>Stop Name</label>
+            <input type="text" id="stopName${busNumber}_${j}" required>
+            
+            <label>Stop Fare</label>
+            <input type="number" id="stopFare${busNumber}_${j}" required>
+        `;
+        
+        container.appendChild(stopSection);
+    }
+}
+
 
         function submitForm() {
             // Show loading overlay
@@ -221,7 +224,7 @@
 
             const numberOfBuses = document.getElementById('numberOfBuses').value;
 
-            for (let i = 0; i < numberOfBuses; i++) {
+            for (let i = 1; i <= numberOfBuses; i++) {
                 const busDetails = {
                     busName: document.getElementById(`busName${i}`).value,
                     permitNumber: document.getElementById(`permitNumber${i}`).value,
@@ -233,17 +236,14 @@
 
                 const numberOfStops = document.getElementById(`numberOfStops${i}`).value;
                 
-                for (let j = 0; j < numberOfStops; j++) {
+                for (let j = 1; j <= numberOfStops; j++) {
                     busDetails.stops.push({
                         stopName: document.getElementById(`stopName${i}_${j}`).value,
                         fare: document.getElementById(`stopFare${i}_${j}`).value
                     });
                 }
 
-                // Create a row for each stop
-                 // Add bus details to the formData object
                 formData.buses.push(busDetails);  
-
             }
 
             // Send data to Google Apps Script
@@ -276,13 +276,11 @@
         }
 
         function resetForm() {
-            // Reset owner details
             document.getElementById('ownerName').value = '';
             document.getElementById('primaryPhone').value = '';
             document.getElementById('additionalPhone').value = '';
             document.getElementById('address').value = '';
 
-            // Reset bus details
             document.getElementById('numberOfBuses').value = '';
             document.getElementById('busDetailsContainer').innerHTML = '';
             document.getElementById('submitBtn').style.display = 'none';
