@@ -133,11 +133,17 @@
                     <input type="text" id="busName${i}" required>
                     
                     <label>Permit Number</label>
-                    <input type="text" id="permitNumber${i}" required>
-                    
+                    <input type="text" id="permitNumber${i}">
+
+                    <label>Permit Expiry Date</label>
+                    <input type="date" id="permitExpiry${i}">
+
                     <label>Registration Number</label>
                     <input type="text" id="registrationNumber${i}" required>
-                    
+
+                    <label>ID Proof Number (Preferably Aadhaar Number)</label>
+                    <input type="text" id="idProof${i}">
+
                     <label>Route</label>
                     <input type="text" id="route${i}" required>
                     
@@ -225,7 +231,9 @@
                 const busDetails = {
                     busName: document.getElementById(`busName${i}`).value,
                     permitNumber: document.getElementById(`permitNumber${i}`).value,
+                    permitExpiry: document.getElementById(`permitExpiry${i}`).value,
                     registrationNumber: document.getElementById(`registrationNumber${i}`).value,
+                    idProof: document.getElementById(`idProof${i}`).value,
                     route: document.getElementById(`route${i}`).value,
                     numberOfTrips: document.getElementById(`numberOfTrips${i}`).value,
                     stops: []
